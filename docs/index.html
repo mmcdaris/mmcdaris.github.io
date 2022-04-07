@@ -19,47 +19,89 @@
   <body>
     <textarea id="source">
 
-class: center, middle
+# `go work`spaces
 
-# Your Workflow & the GitHub Platform
+**One of the other `1.18` features**, not generics.
 
-???
-
-Notes for the _first_ slide!
-
----
-
-# Agenda
-
-1. Introduction
-2. Survey of tools and needs
-3. Looking for automation
-4. Creating an accessible and secure workflow
+What is the go workspace feature?
+- It's part of the go module system for specifying dependencies.
+- Helps you quickly modify a package you are interested in adding to or fixing up.
+  - Start with a workspace any time you say to yourself "Oh! this would be so cool if I could do X"!
+    and want an easy way to try out your idea.
+- Serves as a quick way to tell a test app you want to use your local version of a package.
+  - You can do so without littering your `go.mod` file with replace directives.
 
 ---
 
-# Introduction
 
-      It's possible to embed images.
-![](https://cdn.shopify.com/s/files/1/0051/4802/products/mona-1_large.jpg?v=1511308586)
+- Adds a new commands to the Go tool chain `go work`
+  - `go work init`
+    - create a new empty `go.work` file
+  - `go work use <path-to-some-local-package>`
+    - specify a local package you want your test app to use
+    - the a
+
+--
+
+- A workspace is a collection of modules on disk that are read/write.
 
 ---
 
-# Survey of tools and needs
+# Why were they added?
+
+- Why were they added?
+  - Sometimes working with multiple modules can be clumsy.
+  - The same behavior with a go.mod file would require replace statements.
+    - The replace statements would need to be removed prior to the next version
+    release of the module.
+    - You may accidentally commit the replace statements and cause a build failure
 
 ---
 
-# Looking for automation
+#  When to use it.
+- How to use it?
+  - A workspace can be declared in a `go.work` file.
+    - The simplest way to generate a one of these is `go work init`
+    - You end up with nearly an empty file
+    - `go work use <path to a dir w/ a go.mod>` The argument to the use directive is a directory with
+    another module's go.mod file.
 
 ---
 
-# Creating an accessible and secure workflow
+# How can we use it?
+  - Local GoBrake development
+    - Imagine you are working on a new GoBrake feature.
+    You want to test this feature on a local app let's say a gin app.
+  - unpublished modules/forks/clones
+    - You've spotted a go package that looks like fun and you want to get hands
+    on learning more about it. Maybe you've had an idea and want to give it a shot.
+    Workspaces make this pretty easy. You get a simple driver app run:
+    ```go
+    go work init
+    go work use <path to pkg>
+    ```
+    and specify the path to the package you want to work on with `go work use <path to package>`
+
+---
+
+# Where is it?
+
+  - go workspaces are a valuable tool to setup local development feedback
+  loops. Where you want to explore an idea and see your changes quickly.
+  - After you are done getting things working the way you like, you can easily
+  remove the go.work file when you want your test app to use the go.mod version
+  of the package.
+  - Also worth noting if you ever want to disable workspaces for a single run
+  you can do so by prefixing your go command with `GOWORK=off`. .e.g.
+  ```go
+  GOWORK=off go run main.go
+  ```
 
     </textarea>
     <script src="https://remarkjs.com/downloads/remark-latest.min.js" type="text/javascript">
     </script>
     <script type="text/javascript">
-      var slideshow = remark.create();
+      var talk = remark.create();
     </script>
   </body>
 </html>
