@@ -19,83 +19,140 @@
   <body>
     <textarea id="source">
 
-# `go work`spaces
+class: center, middle
+# Go workspaces
 
-**One of the other `1.18` features**, not generics.
-
-What is the go workspace feature?
-- It's part of the go module system for specifying dependencies.
-- Helps you quickly modify a package you are interested in adding to or fixing up.
-  - Start with a workspace any time you say to yourself "Oh! this would be so cool if I could do X"!
-    and want an easy way to try out your idea.
-- Serves as a quick way to tell a test app you want to use your local version of a package.
-  - You can do so without littering your `go.mod` file with replace directives.
+One of the other `1.18` features... that's NOT generics.
 
 ---
 
+# What is the go workspace feature?
+- It's a part of the go module system for specifying dependencies.
+- A quick way to use(and modify) a **local version of a package**.
+- Adds some new `go` cli commands!
+--
 
-- Adds a new commands to the Go tool chain `go work`
-  - `go work init`
-    - create a new empty `go.work` file
-  - `go work use <path-to-some-local-package>`
-    - specify a local package you want your test app to use
-    - the a
+#### How do you use it?
+There are a few new additions to the go tooling commands but the main ones to
+get up and running are `go work init` and `go work use`.
+
+```bash
+go work init
+go use PATH_TO_A_LOCAL_PKG
+```
 
 --
 
-- A workspace is a collection of modules on disk that are read/write.
+### More on the use directive
+  - The argument to `go use` tells the project in your current directory to use the
+    local version of some package with a relative or absolute path.
+  - The argument to the use directive can be any directory with a go.mod file.
+
+---
+# What are workspaces good for?
+
+--
+
+#### Create Fast feedback loops
+Workspaces make it easy to quickly explore and expand on existing packages.
+You can quickly set up a brand new feedback loop locally with a new tool you
+want to try to modify to fit your needs.
+
+--
+
+#### Easy open source spikes
+It's become easier to clone or fork a project and try out ideas. Workspaces
+decrease the friction of experimenting with interesting projects. Workspaces
+have the potential to foster new open source contributors by dropping the
+barrier to entry a bit.
+
+--
+
+#### Get early validation
+With workspaces it's possible to create quick prototypes and share them early
+with your team or community. This could be an early concept check before
+investing larger amounts of time into testing when you don't know if the idea
+will be welcomed with open arms.
+
+???
+You should reach for workspaces any time you say to yourself: "Oh! this would
+be so cool if I could do X"! and want an easy way to try out your idea.
+---
+
+# Let's use it!
+
+When I read the changelog for 1.18 and saw workspaces the first thing I thought
+of was using it for gobrake development. It seemed like a great way to run one
+of our example apps and make it use the local version of gobrake instead of the
+most recent version pulled in from a remote.
+
+#### The Gin example app!
+
+I decided to try it out with our gin example app. Here's what the app looks
+like when you run it:
+
+<img width=600 alt="gin-pre-workspace-run" src="./pre-workspaces-go-run.png">
 
 ---
 
-# Why were they added?
+# It's running!
 
-- Why were they added?
-  - Sometimes working with multiple modules can be clumsy.
-  - The same behavior with a go.mod file would require replace statements.
-    - The replace statements would need to be removed prior to the next version
-    release of the module.
-    - You may accidentally commit the replace statements and cause a build failure
+Okay! It's running, it's listening. It's using a remote version of gobrake from
+github. Great for an example app but let's make some tweaks!
+Our goal is to see the notifier config's project id and project key when the
+server is started, and let's make it fancy with the lipgloss pkg from charm.
 
----
-
-#  When to use it.
-- How to use it?
-  - A workspace can be declared in a `go.work` file.
-    - The simplest way to generate a one of these is `go work init`
-    - You end up with nearly an empty file
-    - `go work use <path to a dir w/ a go.mod>` The argument to the use directive is a directory with
-    another module's go.mod file.
+--
+- Goals, when gin starts...
+  - Shows project ID
+  - Shows project Key
+  - FANCY!
 
 ---
 
-# How can we use it?
-  - Local GoBrake development
-    - Imagine you are working on a new GoBrake feature.
-    You want to test this feature on a local app let's say a gin app.
-  - unpublished modules/forks/clones
-    - You've spotted a go package that looks like fun and you want to get hands
-    on learning more about it. Maybe you've had an idea and want to give it a shot.
-    Workspaces make this pretty easy. You get a simple driver app run:
-    ```go
-    go work init
-    go work use <path to pkg>
-    ```
-    and specify the path to the package you want to work on with `go work use <path to package>`
+# Workspace setup
+
+So let's instruct the gin example app to use the local version of Gobrake in a workspace.
+We'll init the work file and use the local version of gobrake.
+
+--
+
+<img width=600 alt="workspace-setup" src="./workspaces-gin-setup.png">
+
+--
+
+Behind the scenes I've made some updates to my local gobrake:
+  - Added a new public mehod to expose the notifier config.
+    - This allowed me to grab project id and key.
+  - Added the lipgloss package so we can be fancy.
+    - Used the lipgloss package in the gobrake gin middleware so it runs when
+      we start our server.
+---
+
+# Let's run it!
+
+Now that we have configured our `go.work` file any gobrake package references
+will point to our modified local version of gobrake. `go.work` files take precedence over anything in the `go.mod` file.
+
+--
+
+**Violla!** We now have a new friendly message for gin users, Served ala workspace.
+
+<img width=600 alt="workspace-gin-run" src="./workspaces-go-run.png">
 
 ---
 
-# Where is it?
-
-  - go workspaces are a valuable tool to setup local development feedback
-  loops. Where you want to explore an idea and see your changes quickly.
-  - After you are done getting things working the way you like, you can easily
-  remove the go.work file when you want your test app to use the go.mod version
-  of the package.
-  - Also worth noting if you ever want to disable workspaces for a single run
+# Wrapping up!
+- After you are done experimenting you can easily remove the `go.work` file when
+  you want your project to use the go.mod version of the package again.
+- If you ever want to disable workspaces for a single run
   you can do so by prefixing your go command with `GOWORK=off`. .e.g.
-  ```go
+  ```bash
   GOWORK=off go run main.go
   ```
+--
+
+# Thanks for listening!
 
     </textarea>
     <script src="https://remarkjs.com/downloads/remark-latest.min.js" type="text/javascript">
